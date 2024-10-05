@@ -1,7 +1,7 @@
 package main
 
 import (
-	"btelli-customersupport-api/api"
+	"btelli-customersupport-app/api"
 )
 
 func main() {

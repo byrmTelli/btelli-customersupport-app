@@ -1,8 +1,9 @@
 package api
 
 import (
-	"btelli-customersupport-api/database"
-	"btelli-customersupport-api/utils"
+	"btelli-customersupport-app/database"
+	"btelli-customersupport-app/handlers"
+	"btelli-customersupport-app/utils"
 	"log"
 	"net/http"
 
@@ -21,9 +22,13 @@ func (s *APIServer) Run() {
 
 	database.Connect()
 
+	database.SeedData()
+
 	router := mux.NewRouter()
 
 	// Define your route here...
+
+	router.Handle("/", http.HandlerFunc(handlers.Home)).Methods("GET")
 
 	log.Println("Customer Support App API running on Port", s.listenAddr)
 	http.ListenAndServe(s.listenAddr, router)
