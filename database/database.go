@@ -2,6 +2,7 @@ package database
 
 import (
 	"btelli-customersupport-app/models"
+	"btelli-customersupport-app/utils"
 	"log"
 	"os"
 
@@ -38,7 +39,6 @@ func MigrateDatabase() {
 		// Database Models to create related table.
 		&models.User{},
 		&models.Role{},
-		&models.Customer{},
 		&models.ComplaintCategory{},
 		&models.Complaint{},
 		&models.Comment{},
@@ -52,13 +52,85 @@ func MigrateDatabase() {
 }
 
 func SeedData() {
-	SeedRolesData(DB)
-	SeedCategoriesData(DB)
-	SeedCustomerData(DB)
-	SeedComplaintData(DB)
+	err := seedRolesData(DB)
+	if err != nil {
+		log.Println("Error seeding roles:", err)
+		return
+	}
+
+	err = seedCategoriesData(DB)
+	if err != nil {
+		log.Println("Error seeding categories:", err)
+		return
+	}
+
+	err = seedUserData(DB)
+	if err != nil {
+		log.Println("Error seeding users:", err)
+		return
+	}
+
+	err = seedComplaintData(DB)
+	if err != nil {
+		log.Println("Error seeding complaints:", err)
+		return
+	}
+
+	err = seedCommentData(DB)
+	if err != nil {
+		log.Println("Error seeding comments:", err)
+		return
+	}
 }
 
-func SeedComplaintData(db *gorm.DB) error {
+func seedCommentData(db *gorm.DB) error {
+	var count int64
+	err := db.Model(&models.Comment{}).Count(&count).Error
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		comments := []models.Comment{
+			{
+				ComplaintID: 5,
+				UserID:      2,
+				CommentText: "Will be  fixed soon.",
+			},
+			{
+				ComplaintID: 5,
+				UserID:      5,
+				CommentText: "Alright! Thank you for your efforts.",
+			},
+			{
+				ComplaintID: 10,
+				UserID:      2,
+				CommentText: "Our team will be handle this problem between 10 or 15 days.",
+			},
+			{
+				ComplaintID: 10,
+				UserID:      5,
+				CommentText: "C'mon is too long to solve.",
+			},
+			{
+				ComplaintID: 10,
+				UserID:      5,
+				CommentText: "Have to be solved quicker!",
+			},
+		}
+		for _, comment := range comments {
+			err := db.Create(&comment).Error
+			if err != nil {
+				log.Println("Error while seeding comment data. Error: ", err)
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func seedComplaintData(db *gorm.DB) error {
 	var count int64
 
 	err := db.Model(&models.Complaint{}).Count(&count).Error
@@ -71,62 +143,72 @@ func SeedComplaintData(db *gorm.DB) error {
 			{
 				Title:       "Product was delivered late.",
 				Description: "Product was delivered late.",
-				CustomerID:  1,
+				UserID:      3,
 				CategoryID:  1,
+				Status:      models.Resolved,
 			},
 			{
 				Title:       "Package arrived damaged.",
 				Description: "Package arrived damaged.",
-				CustomerID:  2,
+				UserID:      3,
 				CategoryID:  1,
+				Status:      models.Resolved,
 			},
 			{
 				Title:       "Wrong product was sent.",
 				Description: "Wrong product was sent.",
-				CustomerID:  3,
+				UserID:      3,
 				CategoryID:  2,
+				Status:      models.Cancelled,
 			},
 			{
 				Title:       "Return process was not accepted.",
 				Description: "Return process was not accepted.",
-				CustomerID:  4,
+				UserID:      4,
 				CategoryID:  3,
+				Status:      models.Cancelled,
 			},
 			{
 				Title:       "Support hotline is too slow.",
 				Description: "Support hotline is too slow.",
-				CustomerID:  5,
+				UserID:      5,
 				CategoryID:  1,
+				Status:      models.InProgress,
 			},
 			{
 				Title:       "Incomplete product shipment.",
 				Description: "Incomplete product shipment.",
-				CustomerID:  6,
+				UserID:      6,
 				CategoryID:  2,
+				Status:      models.InProgress,
 			},
 			{
 				Title:       "Product advertisement was misleading.",
 				Description: "Product advertisement was misleading.",
-				CustomerID:  2,
+				UserID:      4,
 				CategoryID:  1,
+				Status:      models.InProgress,
 			},
 			{
 				Title:       "Invoice was incorrect.",
 				Description: "Invoice was incorrect.",
-				CustomerID:  3,
+				UserID:      3,
 				CategoryID:  2,
+				Status:      models.InProgress,
 			},
 			{
 				Title:       "Not covered under warranty.",
 				Description: "Not covered under warranty.",
-				CustomerID:  4,
+				UserID:      7,
 				CategoryID:  2,
+				Status:      models.InProgress,
 			},
 			{
 				Title:       "Technical service is inadequate.",
 				Description: "Technical service is inadequate.",
-				CustomerID:  5,
+				UserID:      5,
 				CategoryID:  1,
+				Status:      models.InProgress,
 			},
 		}
 
@@ -143,10 +225,10 @@ func SeedComplaintData(db *gorm.DB) error {
 
 }
 
-func SeedRolesData(db *gorm.DB) error {
+func seedRolesData(db *gorm.DB) error {
 	var count int64
 
-	err := db.Model(&models.Customer{}).Count(&count).Error
+	err := db.Model(&models.Role{}).Count(&count).Error
 	if err != nil {
 		return err
 	}
@@ -154,7 +236,7 @@ func SeedRolesData(db *gorm.DB) error {
 	if count == 0 {
 		roles := []models.Role{
 			{Name: "Admin"},
-			{Name: "User"},
+			{Name: "Help Desk"},
 			{Name: "Customer"},
 		}
 
@@ -171,26 +253,89 @@ func SeedRolesData(db *gorm.DB) error {
 
 }
 
-func SeedCustomerData(db *gorm.DB) error {
+func seedUserData(db *gorm.DB) error {
 	var count int64
 
-	err := db.Model(&models.Customer{}).Count(&count).Error
+	err := db.Model(&models.User{}).Count(&count).Error
 	if err != nil {
 		return err
 	}
+	password, err := utils.HashPassword("Password123.")
+
+	if err != nil {
+		log.Fatalf("Error occured while hashing seeder passwords.")
+	}
 
 	if count == 0 {
-		customers := []models.Customer{
-			{Name: "John Doe", Email: "john@example.com", Phone: "0 555 333 22 11"},
-			{Name: "Jane Smith", Email: "jane@example.com", Phone: "0 555 333 22 12"},
-			{Name: "Sam Brown", Email: "sam@example.com", Phone: "0 555 333 22 13"},
-			{Name: "Jenny Ack", Email: "jenny@example.com", Phone: "0 555 333 22 14"},
-			{Name: "Luis Wutz", Email: "luis@example.com", Phone: "0 555 333 22 15"},
-			{Name: "Commander Logar", Email: "logar@example.com", Phone: "0 555 333 22 16"},
+		users := []models.User{
+			{
+				UserName:     "bayramtelli",
+				Name:         "Bayram",
+				Surname:      "Telli",
+				Email:        "bayram@example.com",
+				Phone:        "0 555 333 22 10",
+				PasswordHash: password,
+				RoleID:       1,
+			},
+
+			{
+				UserName:     "johndoe",
+				Name:         "John",
+				Surname:      "Doe",
+				Email:        "john@example.com",
+				Phone:        "0 555 333 22 11",
+				PasswordHash: password,
+				RoleID:       2,
+			},
+			{
+				UserName:     "janesmith",
+				Name:         "Jane",
+				Surname:      "Smith",
+				Email:        "jane@example.com",
+				Phone:        "0 555 333 22 12",
+				PasswordHash: password,
+				RoleID:       3,
+			},
+			{
+				UserName:     "sambrown",
+				Name:         "Sam",
+				Surname:      "Brown",
+				Email:        "sam@example.com",
+				Phone:        "0 555 333 22 13",
+				PasswordHash: password,
+				RoleID:       3,
+			},
+			{
+				UserName:     "jennyack",
+				Name:         "Jenny",
+				Surname:      "Ach",
+				Email:        "jenny@example.com",
+				Phone:        "0 555 333 22 14",
+				PasswordHash: password,
+				RoleID:       3,
+			},
+			{
+				UserName:     "luiswutz",
+				Name:         "Luis",
+				Surname:      "Wutz",
+				Email:        "luis@example.com",
+				Phone:        "0 555 333 22 15",
+				PasswordHash: password,
+				RoleID:       3,
+			},
+			{
+				UserName:     "commanderlogar",
+				Name:         "Commander",
+				Surname:      "Logar",
+				Email:        "logar@example.com",
+				Phone:        "0 555 333 22 16",
+				PasswordHash: password,
+				RoleID:       3,
+			},
 		}
 
-		for _, customer := range customers {
-			err := db.Create(&customer).Error
+		for _, user := range users {
+			err := db.Create(&user).Error
 			if err != nil {
 				log.Println("Error while seeding customer data. Error: ", err)
 				return err
@@ -202,7 +347,7 @@ func SeedCustomerData(db *gorm.DB) error {
 
 }
 
-func SeedCategoriesData(db *gorm.DB) error {
+func seedCategoriesData(db *gorm.DB) error {
 	var count int64
 
 	err := db.Model(&models.ComplaintCategory{}).Count(&count).Error
