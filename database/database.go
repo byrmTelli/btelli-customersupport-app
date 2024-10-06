@@ -69,51 +69,61 @@ func SeedComplaintData(db *gorm.DB) error {
 	if count == 0 {
 		complaints := []models.Complaint{
 			{
+				Title:       "Product was delivered late.",
 				Description: "Product was delivered late.",
 				CustomerID:  1,
 				CategoryID:  1,
 			},
 			{
+				Title:       "Package arrived damaged.",
 				Description: "Package arrived damaged.",
 				CustomerID:  2,
 				CategoryID:  1,
 			},
 			{
+				Title:       "Wrong product was sent.",
 				Description: "Wrong product was sent.",
 				CustomerID:  3,
 				CategoryID:  2,
 			},
 			{
+				Title:       "Return process was not accepted.",
 				Description: "Return process was not accepted.",
 				CustomerID:  4,
 				CategoryID:  3,
 			},
 			{
+				Title:       "Support hotline is too slow.",
 				Description: "Support hotline is too slow.",
 				CustomerID:  5,
 				CategoryID:  1,
 			},
 			{
+				Title:       "Incomplete product shipment.",
 				Description: "Incomplete product shipment.",
 				CustomerID:  6,
 				CategoryID:  2,
 			},
 			{
+				Title:       "Product advertisement was misleading.",
 				Description: "Product advertisement was misleading.",
 				CustomerID:  2,
 				CategoryID:  1,
 			},
 			{
+				Title:       "Invoice was incorrect.",
 				Description: "Invoice was incorrect.",
 				CustomerID:  3,
 				CategoryID:  2,
 			},
 			{
+				Title:       "Not covered under warranty.",
 				Description: "Not covered under warranty.",
 				CustomerID:  4,
 				CategoryID:  2,
 			},
 			{
+				Title:       "Technical service is inadequate.",
 				Description: "Technical service is inadequate.",
 				CustomerID:  5,
 				CategoryID:  1,

@@ -42,6 +42,7 @@ type Customer struct {
 
 type Complaint struct {
 	ID          uint   `gorm:"primaryKey"`
+	Title       string `gorm:"not null"`
 	Description string `gorm:"not null"`
 	CustomerID  uint
 	Customer    Customer `gorm:"foreignKey:CustomerID"`

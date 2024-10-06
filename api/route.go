@@ -27,8 +27,14 @@ func (s *APIServer) Run() {
 	router := mux.NewRouter()
 
 	// Define your route here...
-
 	router.Handle("/", http.HandlerFunc(handlers.Home)).Methods("GET")
+
+	// Complaints
+	router.Handle("/complaints", http.HandlerFunc(handlers.GetComplaints)).Methods("GET")
+	router.Handle("/complaint/{id}", http.HandlerFunc(handlers.GetComplaint)).Methods("GET")
+	router.Handle("/createcomplaint", http.HandlerFunc(handlers.CreateComplaint)).Methods("POST")
+	router.Handle("/updatecomplaint/{id}", http.HandlerFunc(handlers.UpdateComplaint)).Methods("PUT")
+	router.Handle("/removecomplaint/{id}", http.HandlerFunc(handlers.RemoveComplaint)).Methods("DELETE")
 
 	log.Println("Customer Support App API running on Port", s.listenAddr)
 	http.ListenAndServe(s.listenAddr, router)
