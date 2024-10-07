@@ -3,6 +3,7 @@ package api
 import (
 	"btelli-customersupport-app/database"
 	"btelli-customersupport-app/handlers"
+	"btelli-customersupport-app/middlewares"
 	"btelli-customersupport-app/utils"
 	"log"
 	"net/http"
@@ -26,28 +27,34 @@ func (s *APIServer) Run() {
 
 	router := mux.NewRouter()
 
-	// Define your route here...
-	router.Handle("/", http.HandlerFunc(handlers.Home)).Methods("GET")
+	// Auth
+	router.Handle("/login", http.HandlerFunc(handlers.Login)).Methods("POST")
 
+	// Admin Only
+	router.Handle("/assingrole", middlewares.Auth("admin")(http.HandlerFunc(handlers.AssingRoleToUser))).Methods("POST")
+
+	// User
+	router.Handle("/register", http.HandlerFunc(handlers.CreateUser)).Methods("POST")
 	// Comments
-	router.Handle("/comments/{id}", http.HandlerFunc(handlers.GetComments)).Methods("GET")
-	router.Handle("/createcomment", http.HandlerFunc(handlers.CreateComment)).Methods("POST")
-	router.Handle("/updatecommment/{id}", http.HandlerFunc(handlers.UpdateComment)).Methods("PUT")
-	router.Handle("/removecomment/{id}", http.HandlerFunc(handlers.RemoveComment)).Methods("DELETE")
+	router.Handle("/comments/{id}", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.GetComments))).Methods("GET")
+	router.Handle("/createcomment", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.CreateComment))).Methods("POST")
+	router.Handle("/updatecommment/{id}", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.UpdateComment))).Methods("PUT")
+	router.Handle("/removecomment/{id}", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.RemoveComment))).Methods("DELETE")
 
 	// Categories
-	router.Handle("/categories", http.HandlerFunc(handlers.GetCategories)).Methods("GET")
-	router.Handle("/category/{id}", http.HandlerFunc(handlers.GetCategory)).Methods("GET")
-	router.Handle("/createcategory", http.HandlerFunc(handlers.CreateCategory)).Methods("POST")
-	router.Handle("/updatecategory/{id}", http.HandlerFunc(handlers.UpdateCategory)).Methods("PUT")
-	router.Handle("/removecategory/{id}", http.HandlerFunc(handlers.RemoveCategory)).Methods("DELETE")
+	router.Handle("/categories", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.GetCategories))).Methods("GET")
+	router.Handle("/category/{id}", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.GetCategory))).Methods("GET")
+	router.Handle("/createcategory", middlewares.Auth("admin")(http.HandlerFunc(handlers.CreateCategory))).Methods("POST")
+	router.Handle("/updatecategory/{id}", middlewares.Auth("admin")(http.HandlerFunc(handlers.UpdateCategory))).Methods("PUT")
+	router.Handle("/removecategory/{id}", middlewares.Auth("admin")(http.HandlerFunc(handlers.RemoveCategory))).Methods("DELETE")
 
 	// Complaints
-	router.Handle("/complaints", http.HandlerFunc(handlers.GetComplaints)).Methods("GET")
-	router.Handle("/complaint/{id}", http.HandlerFunc(handlers.GetComplaint)).Methods("GET")
-	router.Handle("/createcomplaint", http.HandlerFunc(handlers.CreateComplaint)).Methods("POST")
-	router.Handle("/updatecomplaint/{id}", http.HandlerFunc(handlers.UpdateComplaint)).Methods("PUT")
-	router.Handle("/removecomplaint/{id}", http.HandlerFunc(handlers.RemoveComplaint)).Methods("DELETE")
+	router.Handle("/complaints", middlewares.Auth("admin")(http.HandlerFunc(handlers.GetComplaints))).Methods("GET")
+	router.Handle("/complaints/{id}", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.GetComplaintsById))).Methods("GET")
+	router.Handle("/complaint/{id}", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.GetComplaint))).Methods("GET")
+	router.Handle("/createcomplaint", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.CreateComplaint))).Methods("POST")
+	router.Handle("/updatecomplaint/{id}", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.UpdateComplaint))).Methods("PUT")
+	router.Handle("/removecomplaint/{id}", middlewares.Auth("admin", "help desk", "customer")(http.HandlerFunc(handlers.RemoveComplaint))).Methods("DELETE")
 
 	log.Println("Customer Support App API running on Port", s.listenAddr)
 	http.ListenAndServe(s.listenAddr, router)

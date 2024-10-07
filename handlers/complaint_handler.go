@@ -27,6 +27,11 @@ func UpdateComplaint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check user's rights
+	if !ApproveContent(int(complaint.UserID), w, r) {
+		return
+	}
+
 	err = json.NewDecoder(r.Body).Decode(&complaint)
 	if err != nil {
 		ApiResponse(w, nil, "Invalid input.", http.StatusBadRequest)
@@ -44,8 +49,6 @@ func UpdateComplaint(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateComplaint(w http.ResponseWriter, r *http.Request) {
-
-	// Check user auth.
 
 	// Create a new item
 	var complaint models.Complaint
@@ -94,8 +97,6 @@ func GetComplaint(w http.ResponseWriter, r *http.Request) {
 
 	var complaint models.Complaint
 
-	// Check users rights here...
-
 	// Get related item from database
 	result := database.DB.First(&complaint, id)
 
@@ -108,11 +109,45 @@ func GetComplaint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check user's rights
+	if !ApproveContent(int(complaint.UserID), w, r) {
+		return
+	}
+
 	// Mapping DTO
 
 	complaintDTO := models.MapComplaintToDTO(complaint)
 	// Return related item as a json format.
 	ApiResponse(w, complaintDTO, "", http.StatusOK)
+}
+func GetComplaintsById(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+
+	if err != nil {
+		ApiResponse(w, nil, "Invalid parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Check user's rights
+	if !ApproveContent(int(id), w, r) {
+		return
+	}
+
+	var complaints []models.Complaint
+
+	// Get all ıtems from database...
+	if err := database.DB.Where("user_id = ?", id).Find(&complaints).Error; err != nil {
+		ApiResponse(w, nil, "An error occured while fetching data from database.", http.StatusBadRequest)
+		return
+	}
+
+	// Mapping DTOs
+	complaintDTOs := models.MapComplaintsToDTO(complaints)
+
+	// Return all items as a json format.
+	ApiResponse(w, complaintDTOs, "", http.StatusOK)
 }
 
 func GetComplaints(w http.ResponseWriter, r *http.Request) {

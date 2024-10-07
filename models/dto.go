@@ -2,12 +2,24 @@ package models
 
 import "time"
 
-type ComplaintDTO struct {
+// Auth
+
+type LoginDTO struct {
 	ID          uint   `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	UserID      uint   `json:"user_id"`
-	CategoryID  uint   `json:"category_id"`
+	Username    string `json:"username"`
+	Email       string `json:"email"`
+	AccessToken string `json:"token"`
+}
+
+// Entities
+
+type ComplaintDTO struct {
+	ID          uint            `json:"id"`
+	Title       string          `json:"title"`
+	Description string          `json:"description"`
+	UserID      uint            `json:"user_id"`
+	CategoryID  uint            `json:"category_id"`
+	Status      ComplaintStatus `json:"status"`
 }
 
 type CategoryDTO struct {

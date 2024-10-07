@@ -1,5 +1,16 @@
 package models
 
+// Auth Mapping
+
+func MapUserLoginDTO(u User, token string) LoginDTO {
+	return LoginDTO{
+		ID:          u.ID,
+		Username:    u.UserName,
+		Email:       u.Email,
+		AccessToken: token,
+	}
+}
+
 // Complaint Mapping
 
 func MapComplaintToDTO(c Complaint) ComplaintDTO {
@@ -9,6 +20,7 @@ func MapComplaintToDTO(c Complaint) ComplaintDTO {
 		Description: c.Description,
 		UserID:      c.UserID,
 		CategoryID:  c.CategoryID,
+		Status:      c.Status,
 	}
 }
 
