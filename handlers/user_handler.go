@@ -33,6 +33,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Trim spaces maded by mistake
+	utils.TrimSpacesInStruct(&req)
+
 	pass, err := utils.HashPassword(req.Password)
 	if err != nil {
 		ApiResponse(w, nil, "Error occurred.", http.StatusInternalServerError)

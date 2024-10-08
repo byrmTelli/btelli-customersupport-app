@@ -10,6 +10,19 @@ import (
 	"unicode/utf8"
 )
 
+func TrimSpacesInStruct(s interface{}) {
+	v := reflect.ValueOf(s).Elem()
+
+	// Tüm alanları dolaşarak sadece string türünde olanları kontrol ederiz
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		if field.Kind() == reflect.String {
+			trimmedValue := strings.TrimSpace(field.String())
+			field.SetString(trimmedValue)
+		}
+	}
+}
+
 func ValidateRequestModel(s interface{}) []ValidationError {
 	var errors []ValidationError
 	v := reflect.ValueOf(s)
